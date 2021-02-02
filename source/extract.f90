@@ -25,9 +25,10 @@
 
 !> @brief Extracts 2D cuts (in VTK format) from 3D data files
 program extract
-
-!  use parameters
+  
   use constants
+  use parameters
+
   implicit none
   
   ! ============================================================================
@@ -35,8 +36,8 @@ program extract
   ! ============================================================================
 
   ! Output range to process
-  integer, parameter :: noutmin = 0
-  integer, parameter :: noutmax = 110
+  integer, parameter :: noutmin = 94
+  integer, parameter :: noutmax = tfin/dtout
 
   ! Axis and location of cut
   ! cut_axis must be one of AXIS_X, AXIS_Y, AXIS_Z.
@@ -44,66 +45,33 @@ program extract
   integer, parameter :: cut_axis = AXIS_Z
   real, parameter :: cut_location = 10.0 * AU
 
+  logical, parameter :: cut_output_bin = .true.
+  logical, parameter :: cut_output_vtk = .true.
+
   ! Filenames
-  character(*), parameter :: datadir = "./data/"     ! Path to data dir
-  character(*), parameter :: blockstpl = "BlocksXXX.YYYY"  ! Data files template
   character(*), parameter :: outmaptpl = "CutD.YYYY"  ! Output file template
 
-  ! Output format
-  logical, parameter :: output_vtk = .true.   ! VTK output
-  logical, parameter :: output_bin = .false.   ! Direct binary output
-
-  ! Physical box sizes (cgs)
-  real, parameter :: xsize = 80.0 * AU
-  real, parameter :: ysize = 80.0 * AU
-  real, parameter :: zsize = 20.0 * AU
-
   ! Mesh parameters
-  integer, parameter :: nbrootx = 4
-  integer, parameter :: nbrooty = 4
-  integer, parameter :: nbrootz = 1
-  integer, parameter :: maxlev = 5
-  integer, parameter :: ncells_x = 16
-  integer, parameter :: ncells_y = 16
-  integer, parameter :: ncells_z = 16
-
-  ! Simulation parameters
-  integer, parameter :: nprocs = 4
-  integer, parameter :: neqtot = 5
-
-  ! Gas parameters
-  real, parameter :: gamma = 5.0/3.0
-  real, parameter :: mu0 = 1.3
-  real, parameter :: mui = 0.61
-  real, parameter :: ion_thres = 10000.0 
-  real, parameter :: CV = 1.0/(gamma-1.0) 
-
-  ! Unit scalings
-  real, parameter :: l_sc = 1.0*AU     !< length scale (cm)
-  real, parameter :: d_sc = 1.3*AMU    !< density scale (g cm^-3)
-  real, parameter :: v_sc = 1.0e5      !< velocity scale (cm s^-1)
-
+  ! integer, parameter :: p_nbrootx = 4
+  ! integer, parameter :: p_nbrooty = 4
+  ! integer, parameter :: p_nbrootz = 1
+  ! integer, parameter :: p_maxlev  = 5
+  
   ! ============================================================================
   !                    NO NEED TO MODIFY BELOW THIS POINT
   ! ============================================================================
-  
-  real, parameter :: p_sc = d_sc*v_sc**2
-  real, parameter :: e_sc = p_sc
-  real, parameter :: t_sc = l_sc/v_sc
 
 #ifdef PASBP
   integer, parameter :: npas = neqtot - 8
-  integer, parameter :: firstpas = 9
 #else
   integer, parameter :: npas = neqtot - 5
-  integer, parameter :: firstpas = 6
 #endif
 
   integer :: ilev, bID, blocksused, istat, nb, p
   integer :: i, j, k, i1, j1, k1, ip, jp, i_off, j_off, i2, j2
   integer :: mesh(7), unitin, nblocks, plane, nout
   integer :: nxmap, nymap, nx, ny, cell_count
-  real :: dx(maxlev), pvars(neqtot), uvars(neqtot)
+  real :: dx(p_maxlev), pvars(neqtot), uvars(neqtot)
   character(256) :: filename  
 
   real, allocatable :: block(:,:,:,:)
@@ -113,30 +81,31 @@ program extract
   
   ! Allocate output map
   if (cut_axis.eq.AXIS_X) then
-    nxmap = nbrooty*2**(maxlev-1)*ncells_y
-    nymap = nbrootz*2**(maxlev-1)*ncells_z
+    nxmap = p_nbrooty*2**(p_maxlev-1)*ncells_y
+    nymap = p_nbrootz*2**(p_maxlev-1)*ncells_z
   else if (cut_axis.eq.AXIS_Y) then
-    nxmap = nbrootx*2**(maxlev-1)*ncells_x
-    nymap = nbrootz*2**(maxlev-1)*ncells_z 
+    nxmap = p_nbrootx*2**(p_maxlev-1)*ncells_x
+    nymap = p_nbrootz*2**(p_maxlev-1)*ncells_z 
   else if (cut_axis.eq.AXIS_Z) then
-    nxmap = nbrootx*2**(maxlev-1)*ncells_x
-    nymap = nbrooty*2**(maxlev-1)*ncells_y
+    nxmap = p_nbrootx*2**(p_maxlev-1)*ncells_x
+    nymap = p_nbrooty*2**(p_maxlev-1)*ncells_y
   end if
+
   allocate( outmap(neqtot,nxmap,nymap) )
 
   ! Allocate data array for one block
   allocate( block(neqtot,ncells_x,ncells_y,ncells_z) )
 
   ! Grid spacings - assumed EQUAL for all dimensions
-  do ilev=1,maxlev
-    dx(ilev) = xsize/(ncells_x*nbrootx*2**(ilev-1))
+  do ilev=1,p_maxlev
+    dx(ilev) = xphystot/(ncells_x*p_nbrootx*2**(ilev-1))
   end do
 
   ! Pack mesh parameters
-  mesh(1) = nbrootx
-  mesh(2) = nbrooty
-  mesh(3) = nbrootz
-  mesh(4) = maxlev
+  mesh(1) = p_nbrootx
+  mesh(2) = p_nbrooty
+  mesh(3) = p_nbrootz
+  mesh(4) = p_maxlev
   mesh(5) = ncells_x
   mesh(6) = ncells_y
   mesh(7) = ncells_z
@@ -239,8 +208,8 @@ program extract
             ! Copy data value into output map. Duplicate value 
             ! into multiple cells if block not at highest resolution
 !            write(*,'(a)') "Output map cells:"
-            do i_off=0,2**(maxlev-ilev)-1
-              do j_off=0,2**(maxlev-ilev)-1
+            do i_off=0,2**(p_maxlev-ilev)-1
+              do j_off=0,2**(p_maxlev-ilev)-1
 
                 ! Calculate outmap map coords
                 i2 = i1 + i_off
@@ -282,15 +251,16 @@ program extract
   write(*,'(1x,a,es10.3,1x,es10.3)') "Pressure: ", &
     minval(outmap(5,:,:))*p_sc, maxval(outmap(5,:,:))*p_sc
 
-  ! Write output map to disk
-  if (output_vtk) then
+  ! Write output map to disk?
+  
+  if (cut_output_vtk) then
     write(*,*) ""
     call genfname (0, nout, datadir, outmaptpl, ".vtk", filename)
     write(*,*) "Writing output map to VTK file ", trim(filename)
     call write2DVTK (outmap, nxmap, nymap, filename)
   end if
 
-  if (output_bin) then
+  if (cut_output_bin) then
     write(*,*) ""
     call genfname (0, nout, datadir, outmaptpl, ".bin", filename)
     write(*,*) "Writing output map to BIN file ", trim(filename)
@@ -365,12 +335,12 @@ subroutine bounds(bID, mesh, xl, xh, yl, yh, zl, zh)
   call meshlevel (bID, mesh, ilev)
   call bcoords(bID, mesh, bx, by, bz)
 
-  xl = (bx-1)*xsize/(nbrootx*2**(ilev-1))
-  xh = bx*xsize/(nbrootx*2**(ilev-1))
-  yl = (by-1)*ysize/(nbrooty*2**(ilev-1))
-  yh = by*xsize/(nbrooty*2**(ilev-1))
-  zl = (bz-1)*zsize/(nbrootz*2**(ilev-1))
-  zh = bz*zsize/(nbrootz*2**(ilev-1))
+  xl = (bx-1)*xphystot/(p_nbrootx*2**(ilev-1))
+  xh = bx*xphystot/(p_nbrootx*2**(ilev-1))
+  yl = (by-1)*yphystot/(p_nbrooty*2**(ilev-1))
+  yh = by*xphystot/(p_nbrooty*2**(ilev-1))
+  zl = (bz-1)*zphystot/(p_nbrootz*2**(ilev-1))
+  zh = bz*zphystot/(p_nbrootz*2**(ilev-1))
 
   return
 
@@ -503,9 +473,9 @@ subroutine absCoords(bID,i,j,k,mesh,i1,j1,k1)
   integer, intent(out) :: i1, j1, k1
 
   integer :: ilev, bx, by, bz
-  integer :: maxlev, ncells_x, ncells_y, ncells_z
+  integer :: p_maxlev, ncells_x, ncells_y, ncells_z
 
-  maxlev = mesh(4)
+  p_maxlev = mesh(4)
   ncells_x = mesh(5)
   ncells_y = mesh(6)
   ncells_z = mesh(7)
@@ -514,9 +484,9 @@ subroutine absCoords(bID,i,j,k,mesh,i1,j1,k1)
   call meshlevel (bID, mesh, ilev)
   call bcoords(bID, mesh, bx, by, bz)
 
-  i1 = (bx-1)*ncells_x*2**(maxlev-ilev) + (i-1)*2**(maxlev-ilev) + 1
-  j1 = (by-1)*ncells_y*2**(maxlev-ilev) + (j-1)*2**(maxlev-ilev) + 1
-  k1 = (bz-1)*ncells_z*2**(maxlev-ilev) + (k-1)*2**(maxlev-ilev) + 1
+  i1 = (bx-1)*ncells_x*2**(p_maxlev-ilev) + (i-1)*2**(p_maxlev-ilev) + 1
+  j1 = (by-1)*ncells_y*2**(p_maxlev-ilev) + (j-1)*2**(p_maxlev-ilev) + 1
+  k1 = (bz-1)*ncells_z*2**(p_maxlev-ilev) + (k-1)*2**(p_maxlev-ilev) + 1
   
   return
 
@@ -561,8 +531,8 @@ subroutine write2DVTK (outmap, nx, ny, outfname)
   write(unitout) trim(cbuffer),lf
   write(cbuffer,'(a,f10.5,1x,f10.5,1x,f10.5)') "ORIGIN ", 0.0, 0.0, 0.0
   write(unitout) trim(cbuffer),lf
-  write(cbuffer,'(a,3(es12.5,1x))') "SPACING ", dx(maxlev), dx(maxlev), &
-    dx(maxlev)
+  write(cbuffer,'(a,3(es12.5,1x))') "SPACING ", dx(p_maxlev), dx(p_maxlev), &
+    dx(p_maxlev)
   write(unitout) trim(cbuffer),lf
   write(cbuffer,'(a,i10)') 'POINT_DATA ',npoints
   write(unitout) trim(cbuffer),lf
@@ -687,8 +657,7 @@ subroutine write2Dbin (outmap, nx, ny, outfname)
   write(*,'(2x,i0,a)') size(outmap), " values in array"
 
   unitout = 10
-  open (unit=unitout,file=outfname,status='replace',form='unformatted',&
-       iostat=istat)
+  open (unit=unitout, file=outfname, status='replace', action="write", form = "unformatted",access = 'stream')
 
   write(unitout) outmap
 

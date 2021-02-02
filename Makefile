@@ -79,6 +79,7 @@ OBJECTS_MAIN= \
 # List of modules and objects to compile the Column Density facility
 OBJECTS_COLDENS= \
 ./source/constants.o \
+./source/parameters.o \
 ./source/utils.o \
 ./source/coldens.o
 
@@ -86,7 +87,8 @@ OBJECTS_COLDENS= \
 OBJECTS_EXTRACT= \
 ./source/constants.o \
 ./source/utils.o \
-./source/extract.o
+./source/parameters.o \
+./source/extract.o \
 
 # ==============================================================================
 # THERE SHOULD BE NO NEED TO MODIFY BELOW THIS LINE
@@ -169,3 +171,4 @@ cleanall :
 	rm -f data/*.dat
 	rm -f data/*.log
 	rm -f data/*.visit
+	rm -f data/*.rg

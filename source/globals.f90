@@ -50,8 +50,8 @@ module globals
 
   ! Simulation state globals
   integer :: it            !< Iteration number
-  real :: time             !< Time at start of current timestep
-  real :: dt               !< Current numerical timestep
+  real    :: time             !< Time at start of current timestep
+  real    :: dt               !< Current numerical timestep
   integer :: nextout       !< Number of next output
 
   ! Generic globals
@@ -59,6 +59,8 @@ module globals
   integer :: logu           !< Logfile unit number
   character(80) :: logfile  !< Logfile name
   character(15) :: host     !< The host on which the code runs
+  character(80) :: paramfile
+  integer :: param
 
   ! MPI globals
 #ifdef MPIP 

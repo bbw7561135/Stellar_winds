@@ -36,6 +36,9 @@ program Walicxe3D
   use tictoc       ! Time-measuring library
   implicit none    ! ALWAYS mandatory
 
+  ! print parameters
+  call writeparameters()
+  
   ! Timing mark
   call tic(start_mark)
 

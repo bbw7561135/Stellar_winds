@@ -27,7 +27,6 @@
 !> @details This file declares most global runtime parameters (constants) used
 !! by the code, most of them user-tweakable. It is included by most subroutines.
 module parameters
-
   use constants
 #ifdef MPIP
   use mpi
@@ -39,13 +38,13 @@ module parameters
   ! Execution parameters
   ! ============================================
 
-  real, parameter :: tfin = 33 * YR    !< Final integration time (s)
-  real, parameter :: dtout = 0.1 * YR     !< Time between data dumps (s)
+  real, parameter :: tfin = 1 * YR    !< Final integration time (s)
+  real, parameter :: dtout = 0.05 * YR     !< Time between data dumps (s)
 
   !> Perform warm start?
   logical, parameter :: dowarm = .false.
   !> State file to use for warm start
-  character(*), parameter :: warm_file = ""
+  character(*), parameter :: warm_file = "/storage2/jsmendezh/test1_data/data/State.0099.dat"
 
   !> Number of MPI processes to launch
   integer, parameter :: nProcs = 4
@@ -85,17 +84,17 @@ module parameters
   ! Specify the maximum number of cells desired at the highest refinement
   ! level
   ! > MUST BE POWERS OF TWO! <
-  integer, parameter :: p_maxcells_x = 256
-  integer, parameter :: p_maxcells_y = 256
-  integer, parameter :: p_maxcells_z = 64
+  integer, parameter :: p_maxcells_x = 128
+  integer, parameter :: p_maxcells_y = 128
+  integer, parameter :: p_maxcells_z = 32
 
   ! -- OR --
 
   ! 2) MESH_MANUAL
   ! Specify number of root blocks along each dimension and number of
   ! refinement levels
-  integer, parameter :: p_nbrootx = 1
-  integer, parameter :: p_nbrooty = 1
+  integer, parameter :: p_nbrootx = 4
+  integer, parameter :: p_nbrooty = 4
   integer, parameter :: p_nbrootz = 1
   integer, parameter :: p_maxlev = 5
 
@@ -170,6 +169,8 @@ module parameters
   character(*), parameter :: gridtpl   = "Grid.YYYY"
   !> Filename template for State files
   character(*), parameter :: statetpl  = "State.YYYY"
+  !> Filename file of generic parameters
+  character(*), parameter :: paramfile = "/storage2/jsmendezh/test1_data/data/parameter.dat"
   
   !> Send everything output to stdout to a logfile?
   logical, parameter :: logged = .true.
@@ -204,7 +205,7 @@ module parameters
 
   !> Number of extra passive scalars
   ! At least one is needed if metallicity-dependent cooling is to be used
-  integer, parameter :: npassive = 0
+  integer, parameter :: npassive = 1
 
   !> Courant-Friedrichs-Lewis parameter (0 < CFL < 1.0)
   real, parameter :: CFL = 0.3
@@ -374,4 +375,56 @@ module parameters
   real, parameter :: e_sc = p_sc
   real, parameter :: t_sc = l_sc/v_sc
 
+  ! Write internal datafile to post processing
+  integer, parameter :: param = 11
+
+
+  contains
+
+   subroutine writeparameters()
+
+    implicit none
+
+
+    open(unit=param, file=paramfile, status="replace", position="append")
+    write(param,'(1x,a,es12.5,a,f7.3,a)') "x-size", xphystot, " cm "
+    write(param,'(1x,a,es12.5,a,f7.3,a)') "y-size", yphystot, " cm "
+    write(param,'(1x,a,es12.5,a,f7.3,a)') "z-size", zphystot, " cm "
+    write(param,'(1x,a,i0)') "Max-levelCellsAlong_x ", p_maxcells_x
+    write(param,'(1x,a,i0)') "Max-levelCellsAlong_y ", p_maxcells_y
+    write(param,'(1x,a,i0)') "Max-levelCellsAlong_z ", p_maxcells_z
+    write(param,'(1x,a,i0)') "Refinement-Along_x ", p_nbrootx
+    write(param,'(1x,a,i0)') "Refinement-Along_y ", p_nbrooty
+    write(param,'(1x,a,i0)') "Refinement-Along_z ", p_nbrootz
+    write(param,'(1x,a,i0)') "Max-level_resolution ", p_maxlev
+    write(param,'(1x,a,a)') "Left " , trim(bcname(bc_left))
+    write(param,'(1x,a,a)') "Right ", trim(bcname(bc_right))
+    write(param,'(1x,a,a)') "Front ", trim(bcname(bc_front))
+    write(param,'(1x,a,a)') "Back ", trim(bcname(bc_back))
+    write(param,'(1x,a,a)') "Bottom ", trim(bcname(bc_bottom))
+    write(param,'(1x,a,a)') "Top ", trim(bcname(bc_top))
+    write(param,'(1x,a,i0)') "Hydro_equations ", neqhydro
+    write(param,'(1x,a,i0)') "MHD_equations ", neqmhd
+    write(param,'(1x,a,i0)') "Passive_scalars ", npassive
+    write(param,'(1x,a,i0)') "Total_equations ", neqtot
+    write(param,'(1x,a,f6.3)') "CFL_parameter ", CFL
+    write(param,'(1x,a,f6.3)') "Artificial_viscosity ", visc_eta
+    write(param,'(1x,a,f6.3)') "gamma ", gamma
+    write(param,'(1x,a,f6.3)') "mu0 ", mu0
+    write(param,'(1x,a,f6.3)') "mui ", mui
+    write(param,'(1x,a,f8.1)') "ion_thres ", ion_thres
+    write(param,'(1x,a,es12.5,a)') "Length ", l_sc, " cm"
+    write(param,'(1x,a,es12.5,a)') "Density ", d_sc, " g cm^-3"
+    write(param,'(1x,a,es12.5,a)') "Velocity ", v_sc, " cm s^-1"
+    write(param,'(1x,a,es12.5,a)') "Pressure ", p_sc, " erg cm^-3"
+    write(param,'(1x,a,es12.5,a)') "Time ", t_sc, " s"
+    write(param,'(1x,a,es12.5,a)') "AMU ", AMU, " s"
+    write(param,'(1x,a,es12.5,a)') "Time ", t_sc, " s"
+
+
+   end subroutine writeparameters
+
 end module parameters
+
+
+

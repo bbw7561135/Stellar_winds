@@ -148,9 +148,9 @@ contains
     wind1%xc = x1 
     wind1%yc = y1 
     wind1%zc = z1
-    wind1%radius = 2.5 * AU
-    wind1%mdot = 1e-8 * MSUN/YR
-    wind1%vinf = 100 * KPS
+    wind1%radius = 1.0 * AU
+    wind1%mdot = 1e-7 * MSUN/YR
+    wind1%vinf = 3200 * KPS
     wind1%temp = 1.0e4
     wind1%mu = mui
 
@@ -158,9 +158,9 @@ contains
     wind2%xc = x2 
     wind2%yc = y2 
     wind2%zc = z2
-    wind2%radius = 2.5 * AU
-    wind2%mdot = 1e-6 * MSUN/YR
-    wind2%vinf = 100 * KPS
+    wind2%radius = 1.0 * AU
+    wind2%mdot = 1e-7 * MSUN/YR
+    wind2%vinf = 3000 * KPS
     wind2%temp = 1.0e4
     wind2%mu = mui
 

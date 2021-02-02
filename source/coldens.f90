@@ -26,19 +26,23 @@
 !> @brief Integrates 3D data along a line-of-sight (e.g., column density)
 !> @details Version 2.0
 program coldens
+  use constants
+  use parameters
 
   implicit none
 
   ! Named constants -- don't modify
-
+  
+  ! Cartesian axis 
   integer, parameter :: AXIS_NONE = 0
-  integer, parameter :: AXIS_X = 1
-  integer, parameter :: AXIS_Y = 2
-  integer, parameter :: AXIS_Z = 3
+  ! integer, parameter :: AXIS_X = 1
+  ! integer, parameter :: AXIS_Y = 2
+  ! integer, parameter :: AXIS_Z = 3
 
-  integer, parameter :: INT_COLDENS = 1
-  integer, parameter :: INT_XRAY = 2
-  integer, parameter :: INT_SYNC = 3
+  ! mode operation (quantity to integrate)
+  integer, parameter :: INT_COLDENS = 1 ! density 
+  integer, parameter :: INT_XRAY    = 2 ! emisivity of x-ray (thermodynamics equilibrium) 
+  integer, parameter :: INT_SYNC    = 3 ! sinchroton emission 
 
   integer, parameter :: LOAD_BLOCK = 1
   integer, parameter :: LOAD_ALL = 2
@@ -48,25 +52,25 @@ program coldens
   integer, parameter :: ACCEL_PER = 2
 
   ! Constants (7 significant digits)
-  real, parameter :: PC  = 3.085680E+18
-  real, parameter :: AMU = 1.660539E-24
-  real, parameter :: KB  = 1.380658E-16
-  real, parameter :: PI  = 3.141593
+  ! real, parameter :: PC  = 3.085680E+18
+  ! real, parameter :: AMU = 1.660539E-24
+  ! real, parameter :: KB  = 1.380658E-16
+  ! real, parameter :: PI  = 3.141593
   
   ! ============================================================================
   ! PROGRAM CONFIGURATION
   ! ============================================================================
 
   ! Run Parameters
-  integer, parameter :: outmin = 0     ! First output number to process
-  integer, parameter :: outmax = 0     ! Last output number to process
+  integer, parameter :: outmin = 94     ! First output number to process
+  integer, parameter :: outmax = tfin/dtout     ! Last output number to process
 
   ! Integration Type
   ! Currently supported options:
   !  INT_COLDENS: column density integration
   !  INT_XRAY: thermal xray emission
   !  INT_SYNC: synchrotron emission
-  integer, parameter :: int_type = INT_SYNC
+  integer, parameter :: int_type = INT_XRAY
 
   ! Data load method
   ! Currently supported options:
@@ -112,11 +116,11 @@ program coldens
   ! rot1_axis = AXIS_Y, rot1_angle = +90.0
   ! If you want to project along the y-axis, set the following rotation:
   ! rot1_axis = AXIS_X, rot1_angle = -90.0
-  real, parameter :: rot_center_x = 256
-  real, parameter :: rot_center_y = 256
-  real, parameter :: rot_center_z = 256
-  integer, parameter :: rot1_axis  = AXIS_X
-  real,    parameter :: rot1_angle = -90.0
+  real,    parameter :: rot_center_x = 0!p_maxcells_x/2
+  real,    parameter :: rot_center_y = 0!p_maxcells_y/2
+  real,    parameter :: rot_center_z = 0!p_maxcells_z/2
+  integer, parameter :: rot1_axis  = AXIS_NONE
+  real,    parameter :: rot1_angle = 0.0
   integer, parameter :: rot2_axis  = AXIS_NONE
   real,    parameter :: rot2_angle = 0.0
   integer, parameter :: rot3_axis  = AXIS_NONE
@@ -125,63 +129,64 @@ program coldens
   real,    parameter :: rot4_angle = 0.0
 
   ! Output map size
-  integer, parameter :: mapcells_x = 512
-  integer, parameter :: mapcells_y = 512
-
+  integer, parameter :: mapcells_x = 1024
+  integer, parameter :: mapcells_y = 1024
+  
   ! Output format
-  logical, parameter :: output_bin = .true.    ! Direct binary output
-  logical, parameter :: output_rg  = .true.    ! Graphic output
+  ! logical, parameter :: output_bin = .true.    ! Direct binary output
+  logical, parameter :: output_rg  = .false.    ! Graphic output
 
   ! Filenames
-  character(*), parameter :: datadir    = "./DATA/"         ! Path to data dir
-  character(*), parameter :: blockstpl  = "BlocksXXX.YYYY"  ! Data file template
+  ! character(*), parameter :: datadir    = "/storage2/jsmendezh/test1_data/data"         ! Path to data dir
+  ! character(*), parameter :: blockstpl  = "BlocksXXX.YYYY"  ! Data file template
   character(*), parameter :: blockstpl2 = "BlocksXXX.YYYY+100" ! Data file template (alt)
-  character(*), parameter :: gridtpl    = "Grid.YYYY"     ! Grid file template
-  character(*), parameter :: statetpl   = "State.YYYY"    ! State file template
-!  character(*), parameter :: outtpl     = "Xray0.15_8kev2.6e22X.YYYY"  ! Output file template
-  character(*), parameter :: outtpl     = "SyncZZZ+AA_new.YYYY"  ! Output file template
-!  character(*), parameter :: outtpl     = "TestZZZ"  ! Output file template
+  ! character(*), parameter :: gridtpl    = "Grid.YYYY"     ! Grid file template
+  ! character(*), parameter :: statetpl   = "State.YYYY"    ! State file template
+  ! character(*), parameter :: outtpl     = "Xray0.15_8kev2.6e22X.YYYY"  ! Output file template
+  character(*), parameter :: outtpl     = "XrayX.YYYY"  ! Output file template
+  ! character(*), parameter :: outtpl     = "SyncZZZ+AA_new.YYYY"  ! Output file template
+  ! character(*), parameter :: outtpl     = "TestZZZ"  ! Output file template
 
   ! Physical box sizes (cgs)
-  real, parameter :: xsize = 20*PC
-  real, parameter :: ysize = 20*PC
-  real, parameter :: zsize = 20*PC
+  ! real, parameter :: xphystot = 160*AU
+  ! real, parameter :: yphystot = 160*PC
+  ! real, parameter :: zphystot = 40*PC
 
   ! Mesh parameters
-  integer, parameter :: nbrootx = 1
-  integer, parameter :: nbrooty = 1
-  integer, parameter :: nbrootz = 1
-  integer, parameter :: maxlev = 6
-  integer, parameter :: ncells_x = 16
-  integer, parameter :: ncells_y = 16
-  integer, parameter :: ncells_z = 16
+  ! integer, parameter :: p_nbrootx = 1
+  ! integer, parameter :: p_nbrooty = 1
+  ! integer, parameter :: p_nbrootz = 1
+  ! integer, parameter :: p_maxlev = 6
+  ! integer, parameter :: ncells_x = 16
+  ! integer, parameter :: ncells_y = 16
+  ! integer, parameter :: ncells_z = 16
 
   ! Simulation parameters
-  integer, parameter :: nprocs = 24
-  integer, parameter :: neqtot = 9
+  ! integer, parameter :: nprocs = 24
+  ! integer, parameter :: neqtot = 9
 
   ! Unit scalings
-  real, parameter :: l_sc = 1.0*PC          !< length scale (cm)
-  real, parameter :: d_sc = 1.0*1.3*AMU     !< density scale (g cm^-3)
-  real, parameter :: v_sc = 3.2649e05       !< velocity scale (cm s^-1)
-  real, parameter :: p_sc = d_sc*v_sc**2
-  real, parameter :: e_sc = p_sc
-  real, parameter :: t_sc = l_sc/v_sc
+  ! real, parameter :: l_sc = 1.0*PC          !< length scale (cm)
+  ! real, parameter :: d_sc = 1.0*1.3*AMU     !< density scale (g cm^-3)
+  ! real, parameter :: v_sc = 3.2649e05       !< velocity scale (cm s^-1)
+  ! real, parameter :: p_sc = d_sc*v_sc**2
+  ! real, parameter :: e_sc = p_sc
+  ! real, parameter :: t_sc = l_sc/v_sc
 
   ! ====================================================
   ! Xray calculation parameters
   ! ====================================================
 
   ! Xray emissivity coefficients
-  character(*), parameter :: xray_coefs = '/home/claudio/coefs/coef0.15_8kev2.6e22.dat'
+  character(*), parameter :: xray_coefs = '/home/claudio/coefs/coef0.1_10kev.dat'
 
   ! Gas parameters: mean molecular masses for ionized and neutral gas,
   ! ionization threshold and gamma/heat capacity
-  real, parameter :: mui = 1.3/2.1
-  real, parameter :: mu0 = 1.3
-  real, parameter :: ion_thres = 5000
-  real, parameter :: gamma = 5.0/3.0
-  real, parameter :: cv = 1.0/(gamma-1.0)
+  ! real, parameter :: mui = 1.3/2.1
+  ! real, parameter :: mu0 = 1.3
+  ! real, parameter :: ion_thres = 5000
+  ! real, parameter :: gamma = 5.0/3.0
+  ! real, parameter :: cv = 1.0/(gamma-1.0)
 
   ! ====================================================
   ! Synchrotron calculation parameters
@@ -206,7 +211,7 @@ program coldens
   integer :: totcells_x, totcells_y, totcells_z
   integer :: mesh(7), numcoefs, counter
   real :: a, b, c, sigma, Kfact, prog, sumvalue
-  real :: dx(maxlev), pvars(neqtot), uvars(neqtot)
+  real :: dx(p_maxlev), pvars(neqtot), uvars(neqtot)
   real :: line_of_sight(3)
   character(256) :: filename  
 
@@ -228,9 +233,9 @@ program coldens
   if ((load_type.eq.LOAD_ALL).or.(int_type.eq.INT_SYNC)) then
 
     ! Allocate data array for whole simulation at max resolution
-    totcells_x = nbrootx*ncells_x*2**(maxlev-1)
-    totcells_y = nbrooty*ncells_y*2**(maxlev-1)
-    totcells_z = nbrootz*ncells_z*2**(maxlev-1)
+    totcells_x = p_nbrootx*ncells_x*2**(p_maxlev-1)
+    totcells_y = p_nbrooty*ncells_y*2**(p_maxlev-1)
+    totcells_z = p_nbrootz*ncells_z*2**(p_maxlev-1)
 
     allocate( prim(neqtot,totcells_x,totcells_y,totcells_z) )
     prim(:,:,:,:) = 0.0
@@ -285,18 +290,18 @@ program coldens
   end if
 
   ! Grid spacings - assumed EQUAL for all dimensions
-  do ilev=1,maxlev
-    dx(ilev) = xsize/(ncells_x*nbrootx*2**(ilev-1))
+  do ilev=1,p_maxlev
+    dx(ilev) = xphystot/(ncells_x*p_nbrootx*2**(ilev-1))
   end do
 
   ! Compute line-of-sight vector (after rotations)
   call computeLOS (line_of_sight)
 
   ! Pack mesh parameters
-  mesh(1) = nbrootx
-  mesh(2) = nbrooty
-  mesh(3) = nbrootz
-  mesh(4) = maxlev
+  mesh(1) = p_nbrootx
+  mesh(2) = p_nbrooty
+  mesh(3) = p_nbrootz
+  mesh(4) = p_maxlev
   mesh(5) = ncells_x
   mesh(6) = ncells_y
   mesh(7) = ncells_z
@@ -389,13 +394,13 @@ subroutine processAll ()
         if (int_type.eq.INT_COLDENS) then
 
           ! COLUMN DENSITY CALCULATION
-          sumvalue = prim(1,i,j,k)*dx(maxlev)
+          sumvalue = prim(1,i,j,k)*dx(p_maxlev)
 
         else if (int_type.eq.INT_XRAY) then
 
           ! X-RAY CALCULATION
           call calcxray (prim(:,i,j,k), sumvalue)
-          sumvalue = sumvalue*dx(maxlev)
+          sumvalue = sumvalue*dx(p_maxlev)
 
         else if (int_type.eq.INT_SYNC) then
 
@@ -408,8 +413,8 @@ subroutine processAll ()
             call calc_sigma (prim(:,i,j,k), prim_old(:,i,j,k), alpha, &
               deltaS, line_of_sight, sigma)
             call calc_K (prim, neqtot, totcells_x, totcells_y, totcells_z, &
-              i, j, k, dx(maxlev), accel, Kfact)
-            sumvalue = Kfact*sigma*dx(maxlev)
+              i, j, k, dx(p_maxlev), accel, Kfact)
+            sumvalue = Kfact*sigma*dx(p_maxlev)
           end if
 
           if (sumvalue.ne.sumvalue) then
@@ -519,13 +524,13 @@ subroutine processByBlock ()
             if (int_type.eq.INT_COLDENS) then
 
               ! COLUMN DENSITY CALCULATION
-              sumvalue = pvars(1)*dx(maxlev)
+              sumvalue = pvars(1)*dx(p_maxlev)
 
             else if (int_type.eq.INT_XRAY) then
 
               ! X-RAY CALCULATION
               call calcxray (pvars, sumvalue)
-              sumvalue = sumvalue*dx(maxlev)
+              sumvalue = sumvalue*dx(p_maxlev)
 
             else if (int_type.eq.INT_SYNC) then
 
@@ -538,9 +543,9 @@ subroutine processByBlock ()
             ! 2) Project cells into 2D output map
 
             call absCoords (bID,i,j,k,mesh,i1,j1,k1)
-            do i_off=0,2**(maxlev-ilev)-1
-              do j_off=0,2**(maxlev-ilev)-1
-                do k_off=0,2**(maxlev-ilev)-1
+            do i_off=0,2**(p_maxlev-ilev)-1
+              do j_off=0,2**(p_maxlev-ilev)-1
+                do k_off=0,2**(p_maxlev-ilev)-1
                   i2 = i1 + i_off
                   j2 = j1 + j_off
                   k2 = k1 + k_off
@@ -628,9 +633,9 @@ subroutine readbin (nout,use_alt,prim,neq,nx,ny,nz)
           do k=1,ncells_z
 
             ! Calculate absolute cell coords in max-resolution grid
-            i1 = (bx-1)*ncells_x*2**(maxlev-ilev) + (i-1)*2**(maxlev-ilev) + 1
-            j1 = (by-1)*ncells_y*2**(maxlev-ilev) + (j-1)*2**(maxlev-ilev) + 1
-            k1 = (bz-1)*ncells_z*2**(maxlev-ilev) + (k-1)*2**(maxlev-ilev) + 1
+            i1 = (bx-1)*ncells_x*2**(p_maxlev-ilev) + (i-1)*2**(p_maxlev-ilev) + 1
+            j1 = (by-1)*ncells_y*2**(p_maxlev-ilev) + (j-1)*2**(p_maxlev-ilev) + 1
+            k1 = (bz-1)*ncells_z*2**(p_maxlev-ilev) + (k-1)*2**(p_maxlev-ilev) + 1
 
             ! Compute and de-scale primitives
             ! (Magnetic field isn't scaled at the moment)
@@ -643,9 +648,9 @@ subroutine readbin (nout,use_alt,prim,neq,nx,ny,nz)
             pvars(5) = pvars(5)*p_sc
 
             ! Add the cell's data to the corresponding max-resolution cell(s)
-            do xoffset=0,2**(maxlev-ilev)-1
-              do yoffset=0,2**(maxlev-ilev)-1
-                do zoffset=0,2**(maxlev-ilev)-1
+            do xoffset=0,2**(p_maxlev-ilev)-1
+              do yoffset=0,2**(p_maxlev-ilev)-1
+                do zoffset=0,2**(p_maxlev-ilev)-1
                   ip = i1 + xoffset
                   jp = j1 + yoffset
                   kp = k1 + zoffset
@@ -844,9 +849,9 @@ subroutine absCoords(bID,i,j,k,mesh,i1,j1,k1)
   integer, intent(out) :: i1, j1, k1
 
   integer :: ilev, bx, by, bz
-  integer :: maxlev, ncells_x, ncells_y, ncells_z
+  integer :: p_maxlev, ncells_x, ncells_y, ncells_z
 
-  maxlev = mesh(4)
+  p_maxlev = mesh(4)
   ncells_x = mesh(5)
   ncells_y = mesh(6)
   ncells_z = mesh(7)
@@ -855,9 +860,9 @@ subroutine absCoords(bID,i,j,k,mesh,i1,j1,k1)
   call meshlevel (bID, mesh, ilev)
   call bcoords(bID, mesh, bx, by, bz)
 
-  i1 = (bx-1)*ncells_x*2**(maxlev-ilev) + (i-1)*2**(maxlev-ilev) + 1
-  j1 = (by-1)*ncells_y*2**(maxlev-ilev) + (j-1)*2**(maxlev-ilev) + 1
-  k1 = (bz-1)*ncells_z*2**(maxlev-ilev) + (k-1)*2**(maxlev-ilev) + 1
+  i1 = (bx-1)*ncells_x*2**(p_maxlev-ilev) + (i-1)*2**(p_maxlev-ilev) + 1
+  j1 = (by-1)*ncells_y*2**(p_maxlev-ilev) + (j-1)*2**(p_maxlev-ilev) + 1
+  k1 = (bz-1)*ncells_z*2**(p_maxlev-ilev) + (k-1)*2**(p_maxlev-ilev) + 1
 
 end subroutine absCoords
 
@@ -1117,7 +1122,7 @@ subroutine writebin (fname,nx,ny,outmap)
   write(*,'(1x,a,i0)') "Map size: ", sizeof(outmap)
   write(*,'(1x,a,es10.3,es10.3)') "Range of values:", minval(outmap), maxval(outmap)
   write(*,*) ""
-  open (unit=10, file=fname, status='replace', form='unformatted', iostat=istat)
+  open (unit=10, file=fname, status='replace', action="write", form='unformatted', access = "stream")
   write (10) outmap(:,:)
   close (10)
 

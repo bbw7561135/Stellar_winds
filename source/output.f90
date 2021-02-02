@@ -36,6 +36,8 @@ subroutine output (noutput)
 
   integer :: mark, startmark, p
 
+
+
   write(logu,*) ""
   write(logu,*) "============================================"
   write(logu,'(1x,a)') " Writing data ouput ..."
@@ -1003,5 +1005,36 @@ end subroutine write2DMapVTK
 
 
 !===============================================================================
+
+! Write internal datafile to post processing 
+
+
+! subroutine write_parameters()
+!  ! Start parameters intern file
+!  use globals
+!  use parameters 
+
+!  implicit none 
+!  paramfile = "/storage2/jsmendezh/test1_data/data/param.dat"
+!  open(unit=param, file=paramfile, status="unknown", position="append")
+ 
+!  write(param, *) "Hola mundo"
+
+
+
+
+! end subroutine write_parameters
+
+
+
+
+
+
+
+
+
+
+
+
 
 
