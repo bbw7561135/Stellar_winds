@@ -38,13 +38,13 @@ module parameters
   ! Execution parameters
   ! ============================================
 
-  real, parameter :: tfin = 1 * YR    !< Final integration time (s)
-  real, parameter :: dtout = 0.05 * YR     !< Time between data dumps (s)
+  real, parameter :: tfin = 10 * YR    !< Final integration time (s)
+  real, parameter :: dtout = 0.2 * YR     !< Time between data dumps (s)
 
   !> Perform warm start?
   logical, parameter :: dowarm = .false.
   !> State file to use for warm start
-  character(*), parameter :: warm_file = "/storage2/jsmendezh/test1_data/data/State.0099.dat"
+  character(*), parameter :: warm_file = ""!"/storage2/jsmendezh/test1_data/data/State.0099.dat"
 
   !> Number of MPI processes to launch
   integer, parameter :: nProcs = 4
@@ -205,7 +205,7 @@ module parameters
 
   !> Number of extra passive scalars
   ! At least one is needed if metallicity-dependent cooling is to be used
-  integer, parameter :: npassive = 1
+  integer, parameter :: npassive = 0
 
   !> Courant-Friedrichs-Lewis parameter (0 < CFL < 1.0)
   real, parameter :: CFL = 0.3
@@ -425,6 +425,5 @@ module parameters
    end subroutine writeparameters
 
 end module parameters
-
 
 

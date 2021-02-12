@@ -46,10 +46,10 @@ module orbits
 
   ! Orbital parameters of the binary system
   ! All quantities in cgs
-  real, parameter :: M1  = 33 * MSUN   ! Mass of primary
-  real, parameter :: M2  = 11 * MSUN   ! Mass of secondary
-  real, parameter :: P   = 11 * YR       ! Period
-  real, parameter :: ecc = 0.6           ! Eccentricity
+  real, parameter :: M1  = 35.9 * MSUN   ! Mass of primary
+  real, parameter :: M2  = 14.9 * MSUN   ! Mass of secondary
+  real, parameter :: Pe   = 7.93 * YR     ! Period
+  real, parameter :: ecc = 0.6        ! Eccentricity
   real, parameter :: Rx  = 40.0 * AU       ! Barycenter x coord
   real, parameter :: Ry  = 40.0 * AU       ! Barycenter y coord
 
@@ -84,7 +84,7 @@ contains
     ! Compute reduced mass of the system, semi-major axis of reduced orbit
     ! and total angular momentum of the reduced mass
     mu = (M1*M2)/(M1+M2)
-    a = (P*P*GRAV*(M1+M2)/(4*PI*PI))**(1.0/3.0)
+    a = (Pe*Pe*GRAV*(M1+M2)/(4*PI*PI))**(1.0/3.0)
     L = mu*(1-ecc)*a*sqrt((1+ecc)/(1-ecc)*GRAV*(M1+M2)/a)
 
     ! Mean anomaly M

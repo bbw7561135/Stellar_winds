@@ -66,7 +66,7 @@ module userconds
   type(spherical_wind_type) :: wind2
   
   real :: r1 = 30.0 * AU
-  real :: r2 = 50.0 * AU
+  real :: r2 = 35.0 * AU
   real :: d  = 30.0 * AU
   real :: T1 = 0.6 * YR
   real :: T2 = 0.8 * YR
@@ -144,7 +144,7 @@ contains
 
     call computeBinary(phase, x1, y1, x2, y2, vx1, vy1, vx2, vy2)
 
-    ! The spherical wind parameters of wind1
+    ! The spherical wind parameters of wind WC7
     wind1%xc = x1 
     wind1%yc = y1 
     wind1%zc = z1
@@ -154,7 +154,7 @@ contains
     wind1%temp = 1.0e4
     wind1%mu = mui
 
-    ! The spherical wind parameters of wind2
+    ! The spherical wind parameters of wind O4-5
     wind2%xc = x2 
     wind2%yc = y2 
     wind2%zc = z2
@@ -199,7 +199,7 @@ contains
     ! > YOUR BOUNDARY CONDITIONS CODE HERE <  
 
     ! operation to get the phase of the orbit 
-    phase = mod(time*t_sc,P)/P
+    phase = mod(time*t_sc,Pe)/Pe
     ! routine to modify the configuration state of the source winds
     call computeBinary(phase, x1, y1, x2, y2, vx1, vy1, vx2, vy2)
 

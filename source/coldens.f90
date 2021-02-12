@@ -28,6 +28,8 @@
 program coldens
   use constants
   use parameters
+  ! use orbits
+  ! use globals
 
   implicit none
 
@@ -51,6 +53,13 @@ program coldens
   integer, parameter :: ACCEL_PAR = 1
   integer, parameter :: ACCEL_PER = 2
 
+  ! real, parameter :: radius1 = 1.0
+  ! real, parameter :: radius2 = 1.0
+  ! real :: dist1, dist2, x, y, z
+  ! real :: xc1, xc2, yc1, yc2, vxc1, vyc1, vzc1, vxc2, vyc2, vzc2, phase
+  ! real :: zc1 = zphystot/2.0
+  ! real :: zc2 = zphystot/2.0
+
   ! Constants (7 significant digits)
   ! real, parameter :: PC  = 3.085680E+18
   ! real, parameter :: AMU = 1.660539E-24
@@ -62,7 +71,7 @@ program coldens
   ! ============================================================================
 
   ! Run Parameters
-  integer, parameter :: outmin = 94     ! First output number to process
+  integer, parameter :: outmin = 0              ! First output number to process
   integer, parameter :: outmax = tfin/dtout     ! Last output number to process
 
   ! Integration Type
@@ -510,50 +519,59 @@ subroutine processByBlock ()
         do j=1,ncells_y
           do k=1,ncells_z
 
-            ! Compute and de-scale primitives on this cell
-            uvars = block(:,i,j,k)
-            call flow2prim (uvars, pvars)
-            pvars(1) = pvars(1)*d_sc
-            pvars(2) = pvars(2)*v_sc
-            pvars(3) = pvars(3)*v_sc
-            pvars(4) = pvars(4)*v_sc
-            pvars(5) = pvars(5)*p_sc
+            ! call cellPos(bID, i, j, k, x, y, z)
+            ! phase = mod(time*t_sc, Pe)/Pe
+            ! call computeBinary(phase, xc1, yc1, xc2, yc2, vxc1, vyc1, vxc2, vyc2)
+            ! x = x*l_sc; y = y*l_sc; z = z*l_sc
+            ! dist1 = sqrt((x-xc1)**2+(y-yc1)**2+(z-zc1)**2)
+            ! dist2 = sqrt((x-xc2)**2+(y-yc2)**2+(z-zc2)**2)
 
-            ! 1) Compute physical quantity to be integrated
+            ! if (dist1.lt.radius1.and.dist2.lt.radius2) then            
 
-            if (int_type.eq.INT_COLDENS) then
+              ! Compute and de-scale primitives on this cell
+              uvars = block(:,i,j,k)
+              call flow2prim (uvars, pvars)
+              pvars(1) = pvars(1)*d_sc
+              pvars(2) = pvars(2)*v_sc
+              pvars(3) = pvars(3)*v_sc
+              pvars(4) = pvars(4)*v_sc
+              pvars(5) = pvars(5)*p_sc
 
-              ! COLUMN DENSITY CALCULATION
-              sumvalue = pvars(1)*dx(p_maxlev)
+              ! 1) Compute physical quantity to be integrated
 
-            else if (int_type.eq.INT_XRAY) then
+              if (int_type.eq.INT_COLDENS) then
 
-              ! X-RAY CALCULATION
-              call calcxray (pvars, sumvalue)
-              sumvalue = sumvalue*dx(p_maxlev)
+                ! COLUMN DENSITY CALCULATION
+                sumvalue = pvars(1)*dx(p_maxlev)
 
-            else if (int_type.eq.INT_SYNC) then
+              else if (int_type.eq.INT_XRAY) then
 
-              ! SYNCHROTRON CALCULATION CANNOT BE PERFORMED BLOCK-BY-BLOCK
-              write(*,'(1x,a)') "Can't perform synchrotron calculation on a block-by-block basis"
-              stop
+                ! X-RAY CALCULATION
+                call calcxray (pvars, sumvalue)
+                sumvalue = sumvalue*dx(p_maxlev)
 
-            end if
+              else if (int_type.eq.INT_SYNC) then
 
-            ! 2) Project cells into 2D output map
+                ! SYNCHROTRON CALCULATION CANNOT BE PERFORMED BLOCK-BY-BLOCK
+                write(*,'(1x,a)') "Can't perform synchrotron calculation on a block-by-block basis"
+                stop
 
-            call absCoords (bID,i,j,k,mesh,i1,j1,k1)
-            do i_off=0,2**(p_maxlev-ilev)-1
-              do j_off=0,2**(p_maxlev-ilev)-1
-                do k_off=0,2**(p_maxlev-ilev)-1
-                  i2 = i1 + i_off
-                  j2 = j1 + j_off
-                  k2 = k1 + k_off
-                  call projectCell (sumvalue, i2, j2, k2)
+              end if
+
+              ! 2) Project cells into 2D output map
+
+              call absCoords (bID,i,j,k,mesh,i1,j1,k1)
+              do i_off=0,2**(p_maxlev-ilev)-1
+                do j_off=0,2**(p_maxlev-ilev)-1
+                  do k_off=0,2**(p_maxlev-ilev)-1
+                    i2 = i1 + i_off
+                    j2 = j1 + j_off
+                    k2 = k1 + k_off
+                    call projectCell (sumvalue, i2, j2, k2)
+                  end do
                 end do
               end do
-            end do
-
+            ! end if
           end do
         end do
       end do

@@ -36,8 +36,8 @@ program extract
   ! ============================================================================
 
   ! Output range to process
-  integer, parameter :: noutmin = 94
-  integer, parameter :: noutmax = tfin/dtout
+  integer, parameter :: noutmin = 35
+  integer, parameter :: noutmax = 50!tfin/dtout
 
   ! Axis and location of cut
   ! cut_axis must be one of AXIS_X, AXIS_Y, AXIS_Z.

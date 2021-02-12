@@ -3,7 +3,7 @@
 # ==============================================================================
 
 # Name of the compiled binary
-PROGRAM= winds1
+PROGRAM= winds_exp
 
 # Non-MPI Compiler
 # Supported options: gfortran, ifort
@@ -82,6 +82,21 @@ OBJECTS_COLDENS= \
 ./source/parameters.o \
 ./source/utils.o \
 ./source/coldens.o
+
+# OBJECTS_COLDENS= \
+# ./source/constants.o \
+# ./source/parameters.o \
+# ./source/utils.o \
+# ./source/tictoc.o \
+# ./source/globals.o \
+# ./source/deinit.o \
+# ./source/basegrid.o \
+# ./source/admesh.o \
+# ./source/prims.o \
+# ./source/loadbalance.o \
+# ./source/hilbert.o \
+# ./source/orbits.o \
+# ./source/coldens.o
 
 # List of modules and objects to compile the Data Extractor facility
 OBJECTS_EXTRACT= \
