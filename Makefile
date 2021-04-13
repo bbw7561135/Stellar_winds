@@ -3,7 +3,7 @@
 # ==============================================================================
 
 # Name of the compiled binary
-PROGRAM= winds_exp
+PROGRAM= theta1_Orionis_C_cooling
 
 # Non-MPI Compiler
 # Supported options: gfortran, ifort
@@ -79,24 +79,27 @@ OBJECTS_MAIN= \
 # List of modules and objects to compile the Column Density facility
 OBJECTS_COLDENS= \
 ./source/constants.o \
-./source/parameters.o \
 ./source/utils.o \
+./source/orbits.o \
 ./source/coldens.o
 
 # OBJECTS_COLDENS= \
 # ./source/constants.o \
 # ./source/parameters.o \
 # ./source/utils.o \
-# ./source/tictoc.o \
 # ./source/globals.o \
+# ./source/tictoc.o \
 # ./source/deinit.o \
-# ./source/basegrid.o \
-# ./source/admesh.o \
 # ./source/prims.o \
-# ./source/loadbalance.o \
 # ./source/hilbert.o \
-# ./source/orbits.o \
-# ./source/coldens.o
+# ./source/loadbalance.o \
+# ./source/admesh.o \
+# ./source/coldens.o \
+
+
+
+
+# ./source/basegrid.o \
 
 # List of modules and objects to compile the Data Extractor facility
 OBJECTS_EXTRACT= \
