@@ -32,10 +32,10 @@
 module orbits
 
   use constants
+  ! use globals, only: logu
   implicit none
 
   ! Some constants
-  real, parameter :: MEARTH = 5.97e27
   real, parameter :: GRAV = 6.67259e-8
   
   ! ============================================================================
@@ -46,12 +46,12 @@ module orbits
 
   ! Orbital parameters of the binary system
   ! All quantities in cgs
-  real, parameter :: M1  = 35.9 * MSUN   ! Mass of primary
-  real, parameter :: M2  = 14.9 * MSUN   ! Mass of secondary
-  real, parameter :: Pe   = 7.93 * YR     ! Period
-  real, parameter :: ecc = 0.6        ! Eccentricity
-  real, parameter :: Rx  = 40.0 * AU       ! Barycenter x coord
-  real, parameter :: Ry  = 40.0 * AU       ! Barycenter y coord
+  real, parameter :: M1  = 31.0 * MSUN   ! Mass of primary
+  real, parameter :: M2  = 12.0 * MSUN   ! Mass of secondary
+  real, parameter :: Pe  = 10.98 * YR    ! Period
+  real, parameter :: ecc = 0.61        ! Eccentricity
+  real, parameter :: Rx  = 30.0 * AU     ! Barycenter x coord
+  real, parameter :: Ry  = 30.0 * AU     ! Barycenter y coord
 
 contains
 
@@ -120,11 +120,18 @@ contains
     vy1 = -m2/(m1+m2)*vy
     vx2 = m1/(m1+m2)*vx
     vy2 = m1/(m1+m2)*vy
+   
+    ! write(logu, *) "phase = ", phase
+    ! write(logu, *) "x1 = ", x1/AU, "y1 = ", y1/AU
+    ! write(logu, *) "x2 = ", x2/AU, "y1 = ", y2/AU
+    ! write(logu, *) "stars distance = ", sqrt((x1-x2)**2+(y1-y2)**2)/AU
+    ! write(logu, *) "vx1 = ", vx1/KPS, "vy1 = ", vy1/KPS
+    ! write(logu, *) "vx2 = ", vx2/KPS, "vy2 = ", vy2/KPS
 
-!    print*, phase, x1/AU, y1/AU, sqrt(x1**2+y1**2)/AU, &
-!            vx1/KPS, vy1/KPS, sqrt(vx1**2+vy1**2)/KPS, &
-!            x2/AU, y2/AU, sqrt(x2**2+y2**2)/AU, &
-!            vx2/KPS, vy2/KPS, sqrt(vx2**2+vy2**2)/KPS
+    ! write(logu,*) phase, x1/AU, y1/AU, sqrt(x1**2+y1**2)/AU, &
+    !         vx1/KPS, vy1/KPS, sqrt(vx1**2+vy1**2)/KPS, &
+    !         x2/AU, y2/AU, sqrt(x2**2+y2**2)/AU, &
+    !         vx2/KPS, vy2/KPS, sqrt(vx2**2+vy2**2)/KPS
 
   end subroutine computeBinary
 
