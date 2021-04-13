@@ -36,14 +36,14 @@ program extract
   ! ============================================================================
 
   ! Output range to process
-  integer, parameter :: noutmin = 35
-  integer, parameter :: noutmax = 50!tfin/dtout
+  integer, parameter :: noutmin = 0
+  integer, parameter :: noutmax = 219
 
   ! Axis and location of cut
   ! cut_axis must be one of AXIS_X, AXIS_Y, AXIS_Z.
   ! cut_location must be given in physical units.
   integer, parameter :: cut_axis = AXIS_Z
-  real, parameter :: cut_location = 10.0 * AU
+  real, parameter :: cut_location = 7.5 * AU
 
   logical, parameter :: cut_output_bin = .true.
   logical, parameter :: cut_output_vtk = .true.
