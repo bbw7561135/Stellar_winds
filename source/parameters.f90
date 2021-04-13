@@ -7,7 +7,6 @@
 ! Copyright (c) 2014 Juan C. Toledo and Alejandro Esquivel
 !
 ! This file is part of Walicxe3D.
-!
 ! Walicxe3D is free software; you can redistribute it and/or modify
 ! it under the terms of the GNU General Public License as published by
 ! the Free Software Foundation; either version 3 of the License, or
@@ -38,16 +37,16 @@ module parameters
   ! Execution parameters
   ! ============================================
 
-  real, parameter :: tfin = 10 * YR    !< Final integration time (s)
-  real, parameter :: dtout = 0.2 * YR     !< Time between data dumps (s)
+  real, parameter :: tfin = 2 * 10.98 * YR    !< Final integration time (s)
+  real, parameter :: dtout = 0.1 * YR     !< Time between data dumps (s)
 
   !> Perform warm start?
   logical, parameter :: dowarm = .false.
   !> State file to use for warm start
-  character(*), parameter :: warm_file = ""!"/storage2/jsmendezh/test1_data/data/State.0099.dat"
+  character(*), parameter :: warm_file = ""!"/storage2/jsmendezh/WR140/data/State.0064.dat"
 
   !> Number of MPI processes to launch
-  integer, parameter :: nProcs = 4
+  integer, parameter :: nProcs = 32
 
   !> Available memory (RAM) *per process*, in MB
   ! This will determine the number of blocks allocated by the code
@@ -59,9 +58,9 @@ module parameters
   ! ============================================
 
   ! Simulation domain physical size (all in cgs)
-  real, parameter :: xphystot = 80.0 * AU      !< Physical domain size along x
-  real, parameter :: yphystot = 80.0 * AU      !< Physical domain size along y
-  real, parameter :: zphystot = 20.0 * AU      !< Physical domain size along z
+  real, parameter :: xphystot = 60.0 * AU      !< Physical domain size along x
+  real, parameter :: yphystot = 60.0 * AU      !< Physical domain size along y
+  real, parameter :: zphystot = 15.0 * AU      !< Physical domain size along z
 
   ! Mesh Geometry
   
@@ -84,9 +83,9 @@ module parameters
   ! Specify the maximum number of cells desired at the highest refinement
   ! level
   ! > MUST BE POWERS OF TWO! <
-  integer, parameter :: p_maxcells_x = 128
-  integer, parameter :: p_maxcells_y = 128
-  integer, parameter :: p_maxcells_z = 32
+  integer, parameter :: p_maxcells_x = 256
+  integer, parameter :: p_maxcells_y = 256
+  integer, parameter :: p_maxcells_z = 64
 
   ! -- OR --
 
@@ -162,7 +161,7 @@ module parameters
   ! the output number. A file extension will be appended automatically
   ! depending on the selected format and should not be given here.
   !> Path to data directory
-  character(*), parameter :: datadir = "/storage2/jsmendezh/test1_data/data"
+  character(*), parameter :: datadir = "/storage2/jsmendezh/theta1_Orionis_C/data_cooling"
   !> Filename template for Blocks data files
   character(*), parameter :: blockstpl = "BlocksXXX.YYYY"
   !> Filename template for Grid data files
@@ -170,7 +169,7 @@ module parameters
   !> Filename template for State files
   character(*), parameter :: statetpl  = "State.YYYY"
   !> Filename file of generic parameters
-  character(*), parameter :: paramfile = "/storage2/jsmendezh/test1_data/data/parameter.dat"
+  character(*), parameter :: paramfile = datadir//"/parameter.dat"
   
   !> Send everything output to stdout to a logfile?
   logical, parameter :: logged = .true.
@@ -213,6 +212,7 @@ module parameters
   !> Artificial viscosity
   real, parameter :: visc_eta = 5.0E-3
 
+
   ! ============================================
   ! Radiative Cooling
   ! ============================================
@@ -222,12 +222,11 @@ module parameters
   !  COOL_NONE: no radiative cooling
   !  COOL_TABLE: tabulated cooling function (temperature only)
   !  COOL_TABLE_METAL: tabulated cooling function (temperature and metallicity)
-  integer, parameter :: cooling_type = COOL_NONE
+  integer, parameter :: cooling_type = COOL_TABLE
 
   !> Filename with table of cooling coefficients
   ! Several cooling tables are provided in the tables/ subdirectory.
-  character(*), parameter :: cooling_file = "./tables/CHIANTIMazotta.dat"
-
+  character(*), parameter :: cooling_file = "/home/jsmendezh/theta1_Orionis_C/tabla.dat"
   !> Maximum *fractional* thermal energy loss allowed in a single cell
   !! per timestep.
   ! This helps prevent negative pressure errors.
