@@ -1,26 +1,26 @@
 #!/bin/bash
 ### Name of run and output files
-#PBS -N winds1
-#PBS -e winds1.err
-#PBS -o winds1.out
+#PBS -N theta1_Orionis_C_cooling
+#PBS -e theta1_Orionis_C_cooling.err
+#PBS -o theta1_Orionis_C_cooling.out
 
 ##PBS -m ae
-##PBS -M juan.toledo@nucleares.unam.mx
+##PBS -M jsmendezh@correo.nucleares.unam.mx
 
 ### Queue name and number of nodes:processors per node
 #PBS -q default
 #PBS -r n
-#PBS -l nodes=1:gen4:ppn=4
+#PBS -l nodes=1:gen5:ppn=32
 
 ### Set environment variables for mpi.
 export PATH=/usr/mpi/intel/mvapich2-1.8/bin:/usr/local/bin:${PATH}
 export MPD_BIN=/usr/local/bin:
 ### Set the execution directory. This directory MUST exist on each node.
-WORKDIR="/home/jsmendezh/test1/"
+WORKDIR="/home/jsmendezh/theta1_Orionis_C/"
 ### EXEPATH is the directory where your executable resides
-EXEPATH="/home/jsmendezh/test1/"
+EXEPATH="/home/jsmendezh/theta1_Orionis_C/"
 ### EXE is the name of your executable (compiled mpi program) 
-EXE="winds1"
+EXE="theta1_Orionis_C_cooling"
 ### ARGS is optional. If you don't need it simply leave it empty
 ARGS=""
 ### ARGS is also optional.
