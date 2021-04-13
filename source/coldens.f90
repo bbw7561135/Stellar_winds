@@ -27,9 +27,7 @@
 !> @details Version 2.0
 program coldens
   use constants
-  use parameters
-  ! use orbits
-  ! use globals
+  use orbits
 
   implicit none
 
@@ -52,27 +50,14 @@ program coldens
   integer, parameter :: ACCEL_ISO = 0
   integer, parameter :: ACCEL_PAR = 1
   integer, parameter :: ACCEL_PER = 2
-
-  ! real, parameter :: radius1 = 1.0
-  ! real, parameter :: radius2 = 1.0
-  ! real :: dist1, dist2, x, y, z
-  ! real :: xc1, xc2, yc1, yc2, vxc1, vyc1, vzc1, vxc2, vyc2, vzc2, phase
-  ! real :: zc1 = zphystot/2.0
-  ! real :: zc2 = zphystot/2.0
-
-  ! Constants (7 significant digits)
-  ! real, parameter :: PC  = 3.085680E+18
-  ! real, parameter :: AMU = 1.660539E-24
-  ! real, parameter :: KB  = 1.380658E-16
-  ! real, parameter :: PI  = 3.141593
   
   ! ============================================================================
   ! PROGRAM CONFIGURATION
   ! ============================================================================
 
   ! Run Parameters
-  integer, parameter :: outmin = 0              ! First output number to process
-  integer, parameter :: outmax = tfin/dtout     ! Last output number to process
+  integer, parameter :: outmin = 156                      ! First output number to process
+  integer, parameter :: outmax = 219                      ! Last output number to process
 
   ! Integration Type
   ! Currently supported options:
@@ -142,60 +127,68 @@ program coldens
   integer, parameter :: mapcells_y = 1024
   
   ! Output format
-  ! logical, parameter :: output_bin = .true.    ! Direct binary output
+  logical, parameter :: output_bin = .true.     ! Direct binary output
   logical, parameter :: output_rg  = .false.    ! Graphic output
 
   ! Filenames
-  ! character(*), parameter :: datadir    = "/storage2/jsmendezh/test1_data/data"         ! Path to data dir
-  ! character(*), parameter :: blockstpl  = "BlocksXXX.YYYY"  ! Data file template
+  character(*), parameter :: datadir    = "/storage2/jsmendezh/theta1_Orionis_C/data_cooling"         ! Path to data dir
+  character(*), parameter :: blockstpl  = "BlocksXXX.YYYY"  ! Data file template
   character(*), parameter :: blockstpl2 = "BlocksXXX.YYYY+100" ! Data file template (alt)
-  ! character(*), parameter :: gridtpl    = "Grid.YYYY"     ! Grid file template
-  ! character(*), parameter :: statetpl   = "State.YYYY"    ! State file template
+  character(*), parameter :: gridtpl    = "Grid.YYYY"     ! Grid file template
+  character(*), parameter :: statetpl   = "State.YYYY"    ! State file template
   ! character(*), parameter :: outtpl     = "Xray0.15_8kev2.6e22X.YYYY"  ! Output file template
   character(*), parameter :: outtpl     = "XrayX.YYYY"  ! Output file template
   ! character(*), parameter :: outtpl     = "SyncZZZ+AA_new.YYYY"  ! Output file template
   ! character(*), parameter :: outtpl     = "TestZZZ"  ! Output file template
 
   ! Physical box sizes (cgs)
-  ! real, parameter :: xphystot = 160*AU
-  ! real, parameter :: yphystot = 160*PC
-  ! real, parameter :: zphystot = 40*PC
+  real, parameter :: xphystot = 60 * AU 
+  real, parameter :: yphystot = 60 * AU
+  real, parameter :: zphystot = 15 * AU
 
   ! Mesh parameters
-  ! integer, parameter :: p_nbrootx = 1
-  ! integer, parameter :: p_nbrooty = 1
-  ! integer, parameter :: p_nbrootz = 1
-  ! integer, parameter :: p_maxlev = 6
-  ! integer, parameter :: ncells_x = 16
-  ! integer, parameter :: ncells_y = 16
-  ! integer, parameter :: ncells_z = 16
+  integer, parameter :: p_nbrootx = 4
+  integer, parameter :: p_nbrooty = 4
+  integer, parameter :: p_nbrootz = 1
+  integer, parameter :: p_maxlev = 5
+  integer, parameter :: ncells_x = 16
+  integer, parameter :: ncells_y = 16
+  integer, parameter :: ncells_z = 16
 
   ! Simulation parameters
-  ! integer, parameter :: nprocs = 24
-  ! integer, parameter :: neqtot = 9
+  integer, parameter :: nprocs = 32
+  integer, parameter :: neqtot = 5
 
   ! Unit scalings
-  ! real, parameter :: l_sc = 1.0*PC          !< length scale (cm)
-  ! real, parameter :: d_sc = 1.0*1.3*AMU     !< density scale (g cm^-3)
-  ! real, parameter :: v_sc = 3.2649e05       !< velocity scale (cm s^-1)
-  ! real, parameter :: p_sc = d_sc*v_sc**2
-  ! real, parameter :: e_sc = p_sc
-  ! real, parameter :: t_sc = l_sc/v_sc
+  real, parameter :: mu0 = 1.3
+  real, parameter :: ism_dens = 1.0 * mu0 * AMU
+  real, parameter :: l_sc = 1.0*AU          !< length scale (cm)
+  real, parameter :: d_sc = ism_dens        !< density scale (g cm^-3)
+  real, parameter :: v_sc = 1.0e5           !< velocity scale (cm s^-1)
+  real, parameter :: p_sc = d_sc*v_sc**2
+  real, parameter :: e_sc = p_sc
+  real, parameter :: t_sc = l_sc/v_sc
+
+  real :: r1, r2, d
+  real :: dist1, dist2, x, y, z
+  real :: x1, x2, y1, y2, vx1, vy1, vx2, vy2, phase
+  real :: z1 = zphystot/2.0
+  real :: z2 = zphystot/2.0
 
   ! ====================================================
   ! Xray calculation parameters
-  ! ====================================================
+  ! ====================================================c
 
   ! Xray emissivity coefficients
   character(*), parameter :: xray_coefs = '/home/claudio/coefs/coef0.1_10kev.dat'
 
   ! Gas parameters: mean molecular masses for ionized and neutral gas,
   ! ionization threshold and gamma/heat capacity
-  ! real, parameter :: mui = 1.3/2.1
+  real, parameter :: mui = 1.3/2.1
   ! real, parameter :: mu0 = 1.3
-  ! real, parameter :: ion_thres = 5000
-  ! real, parameter :: gamma = 5.0/3.0
-  ! real, parameter :: cv = 1.0/(gamma-1.0)
+  real, parameter :: ion_thres = 5000
+  real, parameter :: gamma = 5.0/3.0
+  real, parameter :: cv = 1.0/(gamma-1.0)
 
   ! ====================================================
   ! Synchrotron calculation parameters
@@ -220,12 +213,14 @@ program coldens
   integer :: totcells_x, totcells_y, totcells_z
   integer :: mesh(7), numcoefs, counter
   real :: a, b, c, sigma, Kfact, prog, sumvalue
-  real :: dx(p_maxlev), pvars(neqtot), uvars(neqtot)
-  real :: line_of_sight(3)
+  real :: dx(p_maxlev), dy(p_maxlev), dz(p_maxlev), pvars(neqtot), uvars(neqtot)
+  real :: line_of_sight(3) , ro(3), r(3)
+  real :: ds, N, at
+  integer :: ii
   character(256) :: filename  
 
   real, allocatable :: block(:,:,:,:)
-  real, allocatable :: prim(:,:,:,:)
+  real, allocatable :: primm(:,:,:,:)
   real, allocatable :: prim_old(:,:,:,:)
   real, allocatable :: outmap(:,:)
   real, allocatable :: xraytable(:,:)  
@@ -246,9 +241,9 @@ program coldens
     totcells_y = p_nbrooty*ncells_y*2**(p_maxlev-1)
     totcells_z = p_nbrootz*ncells_z*2**(p_maxlev-1)
 
-    allocate( prim(neqtot,totcells_x,totcells_y,totcells_z) )
-    prim(:,:,:,:) = 0.0
-    write(*,'(1x,a,f6.1,a)') "prim: ", sizeof(prim)/1024./1024., " MB"
+    allocate( primm(neqtot,totcells_x,totcells_y,totcells_z) )
+    primm(:,:,:,:) = 0.0
+    write(*,'(1x,a,f6.1,a)') "primm: ", sizeof(primm)/1024./1024., " MB"
     
     ! Second data array (for previous output) for synchrotron emission
     if (int_type.eq.INT_SYNC) then
@@ -301,11 +296,12 @@ program coldens
   ! Grid spacings - assumed EQUAL for all dimensions
   do ilev=1,p_maxlev
     dx(ilev) = xphystot/(ncells_x*p_nbrootx*2**(ilev-1))
+    dy(ilev) = yphystot/(ncells_y*p_nbrooty*2**(ilev-1))
+    dz(ilev) = zphystot/(ncells_z*p_nbrootz*2**(ilev-1))
   end do
 
   ! Compute line-of-sight vector (after rotations)
   call computeLOS (line_of_sight)
-
   ! Pack mesh parameters
   mesh(1) = p_nbrootx
   mesh(2) = p_nbrooty
@@ -373,15 +369,15 @@ subroutine processAll ()
   character(3) :: progstr
 
   ! Reset arrays
-  prim(:,:,:,:) = 0.0
+  primm(:,:,:,:) = 0.0
   outmap(:,:) = 0.0
   if (int_type.eq.INT_SYNC) then
     prim_old(:,:,:,:) = 0.0
   end if
   
   ! Load data
-  call readbin (nout,.false.,prim,neqtot,totcells_x,totcells_y,totcells_z)
-  write(*,*) "Density:", minval(prim(1,:,:,:)), maxval(prim(1,:,:,:))
+  call readbin (nout,.false.,primm,neqtot,totcells_x,totcells_y,totcells_z)
+  write(*,*) "Density:", minval(primm(1,:,:,:)), maxval(primm(1,:,:,:))
   if (int_type.eq.INT_SYNC) then
     call readbin (nout,.true.,prim_old,neqtot,totcells_x,totcells_y,totcells_z)
     write(*,*) "Density:", minval(prim_old(1,:,:,:)), maxval(prim_old(1,:,:,:))
@@ -403,12 +399,13 @@ subroutine processAll ()
         if (int_type.eq.INT_COLDENS) then
 
           ! COLUMN DENSITY CALCULATION
-          sumvalue = prim(1,i,j,k)*dx(p_maxlev)
+          sumvalue = primm(1,i,j,k)*dx(p_maxlev)
 
         else if (int_type.eq.INT_XRAY) then
 
           ! X-RAY CALCULATION
-          call calcxray (prim(:,i,j,k), sumvalue)
+          call calcxray (primm(:,i,j,k), sumvalue)
+          
           sumvalue = sumvalue*dx(p_maxlev)
 
         else if (int_type.eq.INT_SYNC) then
@@ -419,9 +416,9 @@ subroutine processAll ()
             ! Skip calculation for face cells
             sumvalue = 0.0
           else
-            call calc_sigma (prim(:,i,j,k), prim_old(:,i,j,k), alpha, &
+            call calc_sigma (primm(:,i,j,k), prim_old(:,i,j,k), alpha, &
               deltaS, line_of_sight, sigma)
-            call calc_K (prim, neqtot, totcells_x, totcells_y, totcells_z, &
+            call calc_K (primm, neqtot, totcells_x, totcells_y, totcells_z, &
               i, j, k, dx(p_maxlev), accel, Kfact)
             sumvalue = Kfact*sigma*dx(p_maxlev)
           end if
@@ -468,12 +465,14 @@ end subroutine processAll
 !===============================================================================
 
 subroutine processByBlock ()
-
   implicit none
 
   ! Reset arrays
   block(:,:,:,:) = 0.0
   outmap(:,:) = 0.0
+
+  ! step in line integral
+  ds = 0.01
 
   ! Read one data file at a time
   do p=0,nprocs-1
@@ -491,44 +490,62 @@ subroutine processByBlock ()
       close(unitin)
       stop
     end if
-    
+
+
     ! Read file header
     blocksread = 0
     read(unitin) nblocks
     write(*,'(1x,a,i0,a)') "File contains ", nblocks, " blocks."
+    
 
     ! Loop over all blocks, process one block at a time
     do nb=1,nblocks
-
+      
       ! Process this block's data
 
       read(unitin) bID
       read(unitin) block(:,:,:,:)
       blocksread = blocksread + 1
+
 !      write(*,'(i0,a)',advance='no') bID, " ... "
       !write(*,*) minval(block(1,:,:,:)), maxval(block(1,:,:,:))
       
+      ! Identify level resolution of the grid
       call meshlevel (bID, mesh, ilev)
+      ! Obtaining the physical coordinates 
       call bcoords(bID, mesh, bx, by, bz)
-
-!        write(*,'(1x,a,i4)') "level=", ilev
-!        write(*,'(1x,a,i4,i4,i4)') "bcoords=", bx, by, bz
+      ! define reference vector 
+      call cellPos(bID, mesh, 1, 1, 1, x, y, z)
+      ro(1) = x
+      ro(2) = y
+      ro(3) = z 
 
       ! For every cell ...
       do i=1,ncells_x
         do j=1,ncells_y
           do k=1,ncells_z
 
-            ! call cellPos(bID, i, j, k, x, y, z)
-            ! phase = mod(time*t_sc, Pe)/Pe
-            ! call computeBinary(phase, xc1, yc1, xc2, yc2, vxc1, vyc1, vxc2, vyc2)
-            ! x = x*l_sc; y = y*l_sc; z = z*l_sc
-            ! dist1 = sqrt((x-xc1)**2+(y-yc1)**2+(z-zc1)**2)
-            ! dist2 = sqrt((x-xc2)**2+(y-yc2)**2+(z-zc2)**2)
+            ! Obtaining physical coordinates given a block 
+            call cellPos(bID, mesh, i, j, k, x, y, z)
 
-            ! if (dist1.lt.radius1.and.dist2.lt.radius2) then            
-
-              ! Compute and de-scale primitives on this cell
+          
+            ! trajectory phase
+            phase = nout*(0.1 * YR)/Pe + 0.25
+            ! Solve the Kepler problem with numerical integration 
+            call computeBinary(phase, x1, y1, x2, y2, vx1, vy1, vx2, vy2)
+            ! Distance between first star and observation point
+            dist1 = sqrt( (x-x1)**2 + (y-y1)**2 + (z-z1)**2)
+            ! Distance between second star and observation point 
+            dist2 = sqrt( (x-x2)**2 + (y-y2)**2 + (z-z2)**2)
+            d     = sqrt( (x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)
+            
+            ! mask radius xray emission first star
+            r1 = 0.5 * d
+            ! mask radius xray emission second star
+            r2 = 0.05 * d
+  
+            ! if (dist1.gt.r1.and.dist2.gt.r2) then            
+              ! Compute and re-scale primitives on this cell
               uvars = block(:,i,j,k)
               call flow2prim (uvars, pvars)
               pvars(1) = pvars(1)*d_sc
@@ -592,7 +609,7 @@ end subroutine processByBlock
 !===============================================================================
 
 ! Reads flow data from a Walicxe3D .bin data ouput and returns an array of primitives
-subroutine readbin (nout,use_alt,prim,neq,nx,ny,nz)
+subroutine readbin (nout,use_alt,primm,neq,nx,ny,nz)
 
   implicit none
 
@@ -602,7 +619,7 @@ subroutine readbin (nout,use_alt,prim,neq,nx,ny,nz)
   integer, intent(in) :: nx
   integer, intent(in) :: ny
   integer, intent(in) :: nz
-  real, intent(out) :: prim(neq,nx,ny,nz)
+  real, intent(out) :: primm(neq,nx,ny,nz)
 
   integer :: xoffset, yoffset, zoffset
 
@@ -633,9 +650,9 @@ subroutine readbin (nout,use_alt,prim,neq,nx,ny,nz)
     ! Read a block
     blocksread = 0
     read(unitin) nblocks
+    write(*,*) "aqui"
     write(*,'(1x,a,i0,a)') "File contains ", nblocks, " blocks. Reading blocks ..."
     do nb=1,nblocks
-
       read(unitin) bID
       write(*,'(1x,i0)',advance='no') bID
       read(unitin) block(:,:,:,:)
@@ -672,7 +689,7 @@ subroutine readbin (nout,use_alt,prim,neq,nx,ny,nz)
                   ip = i1 + xoffset
                   jp = j1 + yoffset
                   kp = k1 + zoffset
-                  prim(:,ip,jp,kp) = prim(:,ip,jp,kp) + pvars(:)
+                  primm(:,ip,jp,kp) = primm(:,ip,jp,kp) + pvars(:)
                 end do
               end do
             end do
@@ -964,11 +981,34 @@ subroutine calcxray (pvars,xrayj)
 !    write(*,*) "T=", temp, "CX=", CX
   end if
 
+  ! step in line integral
+  ds = 0.01*d_sc
+
+  ! Unit vector to image plane 
+  nx = los(1)
+  ny = los(2)
+  nz = los(3)
+  ! increment over the line vision direction
+  do ii=1, 100
+    rx = rox + ii*ds*nx
+    ry = roy + ii*ds*ny
+    rz = roz + ii*ds*nz
+
+
+  ! find which cells belong to position r = (rx, ry, rz)
+
+
+    ! need to find the density given the components of r
+    N =  
+
+  end do 
+
+
   ! Calculate X-ray emission, j = n^2 * Lambda(T)
   if (temp<ion_thres) then
-    xrayj=CX*(pvars(1)/mu0/AMU)**2
+    xrayj=(CX*(pvars(1)/mu0/AMU)**2)*exp(at*N)
   else
-    xrayj=CX*(pvars(1)/mui/AMU)**2
+    xrayj=(CX*(pvars(1)/mui/AMU)**2)*exp(at*N)
   end if
 
   return
@@ -983,18 +1023,18 @@ end subroutine calcxray
 ! where B_sky = B*sin(psi) is the component of the magnetic field
 ! in the plane of the sky (psi=angle between B and line of sight)
 ! Inputs:
-!   prim: real vector of primitives for this output
+!   primm: real vector of primitives for this output
 !   prim_old: real vector of primitives for previous output
 !   alpha: spectral index (S~nu**(-alpha))
 !   deltaS: fractional entropy change threshold for nonzero emission
 !   los: projection axis, one of AXIS_X, AXIS_Y or AXIS_Z
 ! Outputs:
 !   sigma: calculated raw emissivity
-subroutine calc_sigma (prim,prim_old,alpha,deltaS,los,sigma)
+subroutine calc_sigma (primm,prim_old,alpha,deltaS,los,sigma)
 
   implicit none
 
-  real, intent(in) :: prim(neqtot)
+  real, intent(in) :: primm(neqtot)
   real, intent(in) :: prim_old(neqtot)
   real, intent(in) :: alpha
   real, intent(in) :: deltaS
@@ -1008,14 +1048,14 @@ subroutine calc_sigma (prim,prim_old,alpha,deltaS,los,sigma)
   mgam = -5.0/3.0
   mu = 1.3
 
-  dens = prim(1)
-  pres = prim(5)
+  dens = primm(1)
+  pres = primm(5)
   dens_old = prim_old(1)
   pres_old = prim_old(5)
 #ifdef PASBP
-  Bx = prim(7)
-  By = prim(8)
-  Bz = prim(9)
+  Bx = primm(7)
+  By = primm(8)
+  Bz = primm(9)
 #endif
 
   ! Obtain entropy change
@@ -1062,7 +1102,7 @@ end subroutine calc_sigma
 !===============================================================================
 
 ! Angle-dependent amplification factor for synchrotron emission
-subroutine calc_K (prim, neq, nx, ny, nz, i, j, k, dx, accel, Kfact)
+subroutine calc_K (primm, neq, nx, ny, nz, i, j, k, dx, accel, Kfact)
 
   implicit none
 
@@ -1070,7 +1110,7 @@ subroutine calc_K (prim, neq, nx, ny, nz, i, j, k, dx, accel, Kfact)
   integer, intent(in) :: nx
   integer, intent(in) :: ny
   integer, intent(in) :: nz
-  real, intent(in) :: prim(neq,nx,ny,nz)
+  real, intent(in) :: primm(neq,nx,ny,nz)
   integer, intent(in) :: i
   integer, intent(in) :: j
   integer, intent(in) :: k
@@ -1087,12 +1127,12 @@ subroutine calc_K (prim, neq, nx, ny, nz, i, j, k, dx, accel, Kfact)
   ! the magnetic field. The shock normal is approximated using
   ! the direction of the local pressure gradient
 
-  gradpx = (prim(5,i+1,j,k)-prim(5,i-1,j,k))/(2*dx)
-  gradpy = (prim(5,i,j+1,k)-prim(5,i,j-1,k))/(2*dx)
-  gradpz = (prim(5,i,j,k+1)-prim(5,i,j,k-1))/(2*dx)
-  bx = prim(6,i,j,k)
-  by = prim(7,i,j,k)
-  bz = prim(8,i,j,k)
+  gradpx = (primm(5,i+1,j,k)-primm(5,i-1,j,k))/(2*dx)
+  gradpy = (primm(5,i,j+1,k)-primm(5,i,j-1,k))/(2*dx)
+  gradpz = (primm(5,i,j,k+1)-primm(5,i,j,k-1))/(2*dx)
+  bx = primm(6,i,j,k)
+  by = primm(7,i,j,k)
+  bz = primm(8,i,j,k)
   b2 = bx**2 + by**2 + bz**2
   gradp2 = gradpx**2 + gradpy**2 + gradpz**2
   bdotgradp = bx*gradpx + by*gradpy + bz*gradpz
@@ -1307,5 +1347,35 @@ subroutine translatePoint (x, y, z, lx, ly, lz, xp, yp, zp)
 end subroutine translatePoint
 
 !===============================================================================
+
+
+subroutine cellPos (bID, mesh, i, j, k, x, y, z)
+
+  implicit none
+
+  integer, intent(in) :: bID
+  integer, intent(in) :: i, j, k, mesh(7)
+  real, intent(out) :: x, y, z
+
+  integer :: ilev, xb, yb, zb
+
+  if (bID.eq.-1) then
+    x = -1.0
+    y = -1.0
+    z = -1.0
+    return
+  end if
+
+  call meshlevel(bID, mesh, ilev)
+  call bcoords(bID, mesh, xb, yb, zb)
+
+  x = ((xb-1)*mesh(5) + (i-1) + 0.5) * dx(ilev)
+  y = ((yb-1)*mesh(6) + (j-1) + 0.5) * dy(ilev)
+  z = ((zb-1)*mesh(7) + (k-1) + 0.5) * dz(ilev)
+
+  return
+
+end subroutine cellPos
+
 
 end program coldens
