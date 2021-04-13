@@ -70,6 +70,8 @@ subroutine output (noutput)
       write(logu,'(1x,a,i0,a)') "> Writing output ", noutput, " to disk ..."
       write(logu,*) ""
 
+      ! call writetime(noutput)
+
       ! Binary data format - writes flow vars (Us)
       if (output_bin) then
         call writeBin (noutput)
@@ -1006,32 +1008,28 @@ end subroutine write2DMapVTK
 
 !===============================================================================
 
-! Write internal datafile to post processing 
+subroutine writetime(noutput)
 
+  use parameters
+  use globals
+  implicit none
+  
+  integer, intent(in) :: noutput
+  character(100) :: timefile 
+  integer :: timedata
 
-! subroutine write_parameters()
-!  ! Start parameters intern file
-!  use globals
-!  use parameters 
+  write(timefile, '(a)') 'time_file.bin'
 
-!  implicit none 
-!  paramfile = "/storage2/jsmendezh/test1_data/data/param.dat"
-!  open(unit=param, file=paramfile, status="unknown", position="append")
- 
-!  write(param, *) "Hola mundo"
+  timedata = 11
+  open(unit=timedata, file=timefile, status='replace', access='stream')
+  write(logu, *) 'Writing the data file ...'
+  write(timedata) time
+  close(timedata)
+  write(logu, *) 'Succesfully wrote time file.'
+  write(logu, *) ''
 
-
-
-
-! end subroutine write_parameters
-
-
-
-
-
-
-
-
+    
+end subroutine writetime
 
 
 
