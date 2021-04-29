@@ -83,8 +83,11 @@ OBJECTS_COLDENS= \
 ./source/orbits.o \
 ./source/coldens.o
 
-# OBJECTS_COLDENS= \
-# ./source/constants.o \
+OBJECTS_RAYTRACING= \
+./source/constants.o \
+./source/utils.o \
+./source/orbits.o \
+./source/Ray_tracing.o \
 # ./source/parameters.o \
 # ./source/utils.o \
 # ./source/globals.o \
@@ -149,6 +152,13 @@ OBJECTS_ALL = ${MODULES_MAIN} ${MODULES_USER} ${OBJECTS_MAIN}
 $(PROGRAM) : prebuild ${OBJECTS_ALL}
 	@echo Linking object files ...
 	@$(COMPILER) $(CFLAGS) $(OBJECTS_ALL) -o $@
+	@echo Cleaning up ...
+	@rm -f *.o *.mod source/*.o source/*.mod
+	@echo "Done! (`date`)"
+
+raytracing : prebuild $(OBJECTS_RAYTRACING)
+	@echo Linking object files ...
+	@$(COMPILER) $(CFLAGS) $(OBJECTS_RAYTRACING) -o $@
 	@echo Cleaning up ...
 	@rm -f *.o *.mod source/*.o source/*.mod
 	@echo "Done! (`date`)"
